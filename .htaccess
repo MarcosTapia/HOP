@@ -1,0 +1,20 @@
+#<pre>
+#RewriteEngine on
+##RewriteCond $1 !^(index.php|css|js|images|robots.txt
+##RewriteRule ^(.*)$ /Proyecto/index.php/$1 [L]
+#RewriteBase /CodeIgniter -Gs/
+#RewriteCond %{REQUEST_FILENAME} !-f
+#RewriteCond %{REQUEST_FILENAME} !-d
+#RewriteRule ^(.*)$ /Proyecto/index.php/$1 [PT,L]
+#</pre>
+Options FollowSymLinks
+<IfModule mod_rewrite.c>
+    RewriteEngine on    
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php?/$1 [PT,L]
+</IfModule>
+
+<IfModule !mod_rewrite.c>
+    ErrorDocument 404 /matservices/index.php
+</IfModule>
