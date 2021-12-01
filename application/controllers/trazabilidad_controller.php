@@ -108,6 +108,23 @@ class Trazabilidad_controller extends CI_Controller {
             $dt = new DateTime("now", new DateTimeZone('America/Mexico_City'));
             $fechaIngreso = $dt->format("Y-m-d H:i:s"); 
             
+            //obtiene ordenes
+            $url = RUTAWS.'ordenes/obtener_ordenes.php';
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            $dataOrdenes = curl_exec($ch);
+            $datosOrdenes = json_decode($dataOrdenes);
+            curl_close($ch);
+            $ordenes;
+            if ($datosOrdenes->{'estado'} == 2) {
+                $ordenes = null;
+            } else {
+                $ordenes = $datosOrdenes->{'ordenes'};
+            }
+            
+            //obtiene trazabilidades
             $url = RUTAWS.'trazabilidad/obtener_trazabilidad_hoy.php';
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_TIMEOUT, 5);
@@ -116,16 +133,16 @@ class Trazabilidad_controller extends CI_Controller {
             $data = curl_exec($ch);
             $datos = json_decode($data);
             curl_close($ch);
-			$trazabilidades;
+            $trazabilidades;
             if ($datos->{'estado'} == 2) {
-				$trazabilidades = null;
-			} else {
-				$trazabilidades = $datos->{'trazabilidades'};
-			}
+                $trazabilidades = null;
+            } else {
+                $trazabilidades = $datos->{'trazabilidades'};
+            }
 //            echo "En construcción";
             
-            
             $data = array(
+                'ordenes'=>$ordenes,
                 'trazabilidades'=>$trazabilidades,
                 'usuarioDatos' => $this->session->userdata('nombre'),
                 'fecha' => $fechaIngreso,
