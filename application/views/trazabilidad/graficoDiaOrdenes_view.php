@@ -7,6 +7,13 @@
     <link href="<?php echo base_url(); ?>/images/favicon.ico" rel="icon" type="image/x-icon" />    
     <title>En construcción</title>
     <link href="<?php echo base_url(); ?>/css/bootstrap.css" rel="stylesheet">
+
+    <style>
+    #chartdiv {
+      width: 100%;
+      height: 500px;
+    }
+    </style>
     
     <style>
         * {
@@ -72,7 +79,7 @@
 <head>
 </head>
 <body>
-    <div class="container">
+    <div class="container-fluid">
         <div class="row-fluid">
             <center>
             <form autocomplete="off" action="/action_page.php">
@@ -87,23 +94,221 @@
         
         <div class="row-fluid">
             <div class="col-md-12">
-                <h3 style="margin-left:-32px; text-align:center;">Ordenes en proceso</h3>
-            </div>
-        </div>
+                <?php
+                $ordenesDia = [];
+                $ordenesEtapas = [];
+                $numeroOrdenTemp = "";
+                $contadorOrdenes = 0;
+                if ($trazabilidades) {
+                    //Forma el arreglo de ordenes
+                    foreach($trazabilidades as $fila) {
+                        if ($numeroOrdenTemp != $fila->{'numeroOrden'}) {
+                            $numeroOrdenTemp = $fila->{'numeroOrden'};
+                            $ordenesDia[$contadorOrdenes][0] = $fila->{'numeroOrden'};
+                            $ordenesDia[$contadorOrdenes][1] = $fila->{'sap'}." ".$fila->{'variant'};
+                            $ordenesDia[$contadorOrdenes][2] = $fila->{'cantorden'};
+                            $contadorOrdenes++;
+                        }
+                    }
+                    
+                    //obtiene las etapas y cantidades por orden
+                    $j=0;
+                    for($i=0;$i<sizeof($ordenesDia);$i++) {
+                        foreach($trazabilidades as $fila) {
+                            if ($ordenesDia[$i][0] == $fila->{'numeroOrden'}) {
+                                $ordenesEtapas[$j][0] = $ordenesDia[$i][0];
+                                $ordenesEtapas[$j][1] = $fila->{'numeroOperacion'}." ".$fila->{'descripcion_operacion'};
+                                $ordenesEtapas[$j][2] = $ordenesDia[$i][2];
+                                $ordenesEtapas[$j][3] = $fila->{'cantidad'};
+                                $j++;
+                            }
+                        }
+                    }
+                    
+                    //obtiene los total
+                    
+                    for($j=0;$j<sizeof($ordenesEtapas);$j++) {
+                        echo $ordenesEtapas[$j][0]." - ".$ordenesEtapas[$j][1]." ".$ordenesEtapas[$j][2]." ".$ordenesEtapas[$j][3]."<br>";
+                    }
 
-        <div class="row-fluid">
-            <div class="col-md-12">
-                <h1 class="texst-center">
-                    <br><br>
+                    /*
+                    for($i=0;$i<sizeof($ordenesDia);$i++) {
+                        echo $ordenesDia[$i][0]." - ".$ordenesDia[$i][1]." ".$ordenesDia[$i][2]."<br>";
+                    }
+                    
+                    echo "<div id='general' style='background-color:black;'";
+                    echo "<center><h3 style='margin-top:30px; text-align:center;color:white;'>Ordenes en proceso</h3></center>";
+                    
+                    for($i=0;$i<sizeof($ordenesDia);$i++) {
+                        echo "<div id='".$i."' style='background-color:black;border-style: solid;border-color:green;' >";
+                        echo "<p style='color:white;size:22px;'>".$ordenesDia[$i][0]."</p>";
+                        echo "</div><br>";
+                    }
+                    echo "</div";
+                    */
+                    ?>
+                    <div id="chartdiv"></div>    
+                
+                    
+                   <?php 
+                    
+                } else { ?>
                     <center>
-                    <img src="<?php echo base_url(); ?>/images/menubar/enconstruccion.gif" alt="En Construcción" title="En Construcción" />                
-                    </center>
                     <br><br>
-                    <a href="http://localhost:8080/cmpv1_0/">Regresar</a>
-                </h1>   
+                    <h2 style="color:red;">No hay ordenes procesandose en este momento.</h2>
+                    <br>
+                    <img src='<?php echo base_url(); ?>/images/emoji_triste.png' />
+                    <br><br>
+                    <a style="color:blue;font-size: 22px;" href='<?php echo site_url();?>index.php/usuarios_controller/inicio'>Ir a página de inicio</a>
+                    </center>
+                <?php  } ?>
             </div>
         </div>
     </div>
+    
+    
+<!-- Styles -->
+
+    <!-- Resources -->
+    <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+    <script src="https://cdn.amcharts.com/lib/5/xy.js"></script>
+    <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+
+    <!-- Chart code -->
+    <script>
+    am5.ready(function() {
+
+    // Create root element
+    // https://www.amcharts.com/docs/v5/getting-started/#Root_element
+    var root = am5.Root.new("chartdiv");
+
+
+    // Set themes
+    // https://www.amcharts.com/docs/v5/concepts/themes/
+    root.setThemes([
+      am5themes_Animated.new(root)
+    ]);
+
+
+    // Create chart
+    // https://www.amcharts.com/docs/v5/charts/xy-chart/
+    var chart = root.container.children.push(am5xy.XYChart.new(root, {
+      panX: false,
+      panY: false,
+      wheelX: "panY",
+      wheelY: "zoomY",
+      layout: root.verticalLayout
+    }));
+
+    // Add scrollbar
+    // https://www.amcharts.com/docs/v5/charts/xy-chart/scrollbars/
+    chart.set("scrollbarY", am5.Scrollbar.new(root, {
+      orientation: "vertical"
+    }));
+
+    var data = [{
+      "year": "2021",
+      "europe": 2.5,
+      "namerica": 2.5,
+      "asia": 2.1,
+      "lamerica": 1,
+      "meast": 0.8,
+      "africa": 0.4
+    }, {
+      "year": "2022",
+      "europe": 2.6,
+      "namerica": 2.7,
+      "asia": 2.2,
+      "lamerica": 0.5,
+      "meast": 0.4,
+      "africa": 0.3
+    }, {
+      "year": "2023",
+      "europe": 2.8,
+      "namerica": 2.9,
+      "asia": 2.4,
+      "lamerica": 0.3,
+      "meast": 0.9,
+      "africa": 0.5
+    }]
+
+
+    // Create axes
+    // https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
+    var yAxis = chart.yAxes.push(am5xy.CategoryAxis.new(root, {
+      categoryField: "year",
+      renderer: am5xy.AxisRendererY.new(root, {}),
+      tooltip: am5.Tooltip.new(root, {})
+    }));
+
+    yAxis.data.setAll(data);
+
+    var xAxis = chart.xAxes.push(am5xy.ValueAxis.new(root, {
+      min: 0,
+      renderer: am5xy.AxisRendererX.new(root, {})
+    }));
+
+
+    // Add legend
+    // https://www.amcharts.com/docs/v5/charts/xy-chart/legend-xy-series/
+    var legend = chart.children.push(am5.Legend.new(root, {
+      centerX: am5.p50,
+      x: am5.p50
+    }));
+
+
+    // Add series
+    // https://www.amcharts.com/docs/v5/charts/xy-chart/series/
+    function makeSeries(name, fieldName) {
+      var series = chart.series.push(am5xy.ColumnSeries.new(root, {
+        name: name,
+        stacked: true,
+        xAxis: xAxis,
+        yAxis: yAxis,
+        baseAxis: yAxis,
+        valueXField: fieldName,
+        categoryYField: "year"
+      }));
+
+      series.columns.template.setAll({
+        tooltipText: "{name}, {categoryY}: {valueX}",
+        tooltipY: am5.percent(90)
+      });
+      series.data.setAll(data);
+
+      // Make stuff animate on load
+      // https://www.amcharts.com/docs/v5/concepts/animations/
+      series.appear();
+
+      series.bullets.push(function () {
+        return am5.Bullet.new(root, {
+          sprite: am5.Label.new(root, {
+            text: "{valueX}",
+            fill: root.interfaceColors.get("alternativeText"),
+            centerY: am5.p50,
+            centerX: am5.p50,
+            populateText: true
+          })
+        });
+      });
+
+      legend.data.push(series);
+    }
+
+    makeSeries("Europe", "europe");
+    makeSeries("North America", "namerica");
+    makeSeries("Asia", "asia");
+    makeSeries("Latin America", "lamerica");
+    makeSeries("Middle East", "meast");
+    makeSeries("Africa", "africa");
+
+
+    // Make stuff animate on load
+    // https://www.amcharts.com/docs/v5/concepts/animations/
+    chart.appear(1000, 100);
+
+    }); // end am5.ready()
+    </script>    
     
     
     <script>

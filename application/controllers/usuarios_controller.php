@@ -30,21 +30,19 @@ class Usuarios_controller extends CI_Controller {
             $dt = new DateTime("now", new DateTimeZone('America/Mexico_City'));
             $fechaIngreso = $dt->format("Y-m-d H:i:s"); 
             $data = array(
+                'idUsuario'=>$this->session->userdata('permisos'),
                 'permisos'=>$this->session->userdata('permisos'),
+                'apellido_paterno'=>$this->session->userdata('apellido_paterno'),
+                'apellido_materno'=>$this->session->userdata('apellido_materno'),
+                'nombre' => $this->session->userdata('nombre'),
                 'usuarioDatos' => $this->session->userdata('nombre'),
                 'fecha' => $fechaIngreso,
                 'nombre_Empresa'=>$this->nombreEmpresaGlobal,
                 'opcionClickeada' => 'Inicio'
                 );
-            if ($this->session->userdata('permisos') == 2){
-                $this->load->view('layouts/headerTecnico_view',$data);
-            } else {
-                if ($this->session->userdata('permisos') == 1){
-                    $this->load->view('layouts/headerAdministrador_view',$data);
-                }
-            }
+            $this->load->view('layouts/headerAdministrador_view',$data);
             $this->load->view('principal_view',$data);
-            $this->load->view('layouts/pie_view',$data);
+            $this->load->view('layouts/pie_view',$data);;                
         } else {
             redirect($this->cerrarSesion());
         }    

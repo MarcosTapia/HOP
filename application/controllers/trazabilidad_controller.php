@@ -43,10 +43,11 @@ class Trazabilidad_controller extends CI_Controller {
             $dt = new DateTime("now", new DateTimeZone('America/Mexico_City'));
             $fechaIngreso = $dt->format("Y-m-d H:i:s"); 
             $data = array(
-                    'permisos'=>$this->session->userdata('permisos'),
+                     'trazabilidades'=>$datos->{'trazabilidades'},
                     'usuarioDatos' => $this->session->userdata('nombre'),
                     'fecha' => $fechaIngreso,
-                    'sucursal' => $this->session->userdata('sucursal'),
+                    'nombre_Empresa'=>$this->nombreEmpresaGlobal,
+                    'permisos' => $this->session->userdata('permisos'),
                     'nombre_Empresa'=>$this->nombreEmpresaGlobal,
                     'opcionClickeada' => '0'
                 );
